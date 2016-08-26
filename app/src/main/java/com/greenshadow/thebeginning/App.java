@@ -22,7 +22,7 @@ public class App extends Application {
 
         sp = getSharedPreferences("music_settings", MODE_PRIVATE);
         recentListManager = new RecentListManager(sp.getInt("recent_max_count", 10),
-                getApplicationContext());
+                getApplicationContext().getContentResolver());
         recentListManager.parseRecentListFromCursor(getContentResolver()
                 .query(DBStruct.RecentList.CONTENT_URI, new String[]{DBStruct.RecentList.DATA},
                         null, null, null));

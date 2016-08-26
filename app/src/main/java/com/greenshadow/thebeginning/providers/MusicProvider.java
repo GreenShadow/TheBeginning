@@ -11,12 +11,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.greenshadow.thebeginning.App;
 import com.greenshadow.thebeginning.data.DBStruct;
-import com.greenshadow.thebeginning.managers.RecentListManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,7 @@ import java.util.Map;
 /**
  * @author greenshadow
  */
-public class MusicListProvider extends ContentProvider {
+public class MusicProvider extends ContentProvider {
     private static class DBHelper extends SQLiteOpenHelper {
         public DBHelper(Context context) {
             super(context, DBStruct.DB_NAME, null, 1);
@@ -41,7 +40,6 @@ public class MusicListProvider extends ContentProvider {
                     DBStruct.AllMusic.ARTIST + " TEXT, " +
                     DBStruct.AllMusic.ARTIST + " TEXT, " +
                     DBStruct.AllMusic.ALBUM + " TEXT, " +
-                    DBStruct.AllMusic.RAW_URI + " TEXT, " +
                     DBStruct.AllMusic.FILE_PATH + " TEXT, " +
                     DBStruct.AllMusic.LYRIC + " TEXT" +
                     ");");
@@ -82,17 +80,17 @@ public class MusicListProvider extends ContentProvider {
     }
 
     private DBHelper dbHelper;
-    private static final String TAG = "MusicListProvider";
+    private static final String TAG = "MusicProvider";
 
     @Override
     public boolean onCreate() {
         dbHelper = new DBHelper(getContext());
-        return dbHelper != null;
+        return true;
     }
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
         int match = uriMatcher.match(uri);
@@ -136,88 +134,81 @@ public class MusicListProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        Uri result;
-
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+        long id;
+        String table;
         int match = uriMatcher.match(uri);
         switch (match) {
             case MUSIC_ALL:
-                result = DBStruct.AllMusic.CONTENT_URI;
+                table = DBStruct.AllMusic.TABLE_NAME;
+                break;
+            case MUSIC_RECENT:
+                table = DBStruct.RecentList.TABLE_NAME;
                 break;
             case LIST_ALL:
-                result = DBStruct.Playlist.CONTENT_URI;
+                table = DBStruct.Playlist.TABLE_NAME;
                 break;
             default:
                 Log.e(TAG, "not support uri " + uri.toString());
                 return null;
         }
-
-        return result;
+        id = db.insert(table, null, values);
+        return Uri.withAppendedPath(uri, "" + id);
     }
 
     @Override
-    public int delete(Uri uri, String s, String[] strings) {
-        int match = uriMatcher.match(uri);
-        switch (match) {
-            case MUSIC_ALL:
-                break;
-            case MUSIC_RECENT:
-                break;
-            case MUSIC_STAR:
-                break;
-            case MUSIC_CURRENT_LIST:
-                break;
-            case LIST_ALL:
-                break;
-            default:
-                Log.e(TAG, "not support uri " + uri.toString());
-                return -1;
-        }
-        return 0;
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int result = 0;
+        int result;
         String table;
         int match = uriMatcher.match(uri);
         switch (match) {
-            case MUSIC_CURRENT_ID:
+            case MUSIC_ALL:
                 table = DBStruct.AllMusic.TABLE_NAME;
-                result = db.update(table, values, selection, selectionArgs);
                 break;
             case MUSIC_RECENT:
-                String id = (String) values.get("new_id");
-                RecentListManager recentListManager = App.getInstance().getRecentListManager();
-                recentListManager.addRecent(id);
                 table = DBStruct.RecentList.TABLE_NAME;
-                values.clear();
-                values.put(DBStruct.RecentList.DATA, recentListManager.toString());
-                result = db.update(table, values, null, null);
-                break;
-            case MUSIC_STAR:
-                table = DBStruct.AllMusic.TABLE_NAME;
-                ContentValues cv = new ContentValues();
-                break;
-            case MUSIC_CURRENT_LIST:
-                table = DBStruct.AllMusic.TABLE_NAME;
                 break;
             case LIST_ALL:
+                table = DBStruct.Playlist.TABLE_NAME;
                 break;
             default:
                 Log.e(TAG, "not support uri " + uri.toString());
                 return 0;
         }
+        result = db.delete(table, selection, selectionArgs);
+        return result;
+    }
 
+    @Override
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int result;
+        String table;
+        int match = uriMatcher.match(uri);
+        switch (match) {
+            case MUSIC_ALL:
+                table = DBStruct.AllMusic.TABLE_NAME;
+                break;
+            case MUSIC_RECENT:
+                table = DBStruct.RecentList.TABLE_NAME;
+                break;
+            case LIST_ALL:
+                table = DBStruct.Playlist.TABLE_NAME;
+                break;
+            default:
+                Log.e(TAG, "not support uri " + uri.toString());
+                return 0;
+        }
+        result = db.update(table, values, selection, selectionArgs);
         return result;
     }
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
-        return null;
+    public String getType(@NonNull Uri uri) {
+        return "*/*";
     }
 
     private static final String AUTHORITY = DBStruct.AUTHORITY;

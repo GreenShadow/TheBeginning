@@ -1,7 +1,7 @@
 package com.greenshadow.thebeginning.managers;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 
@@ -13,12 +13,12 @@ import java.util.LinkedList;
  * @author greenshadow
  */
 public class RecentListManager {
-    private Context mContext;
+    private ContentResolver mContentResolver;
     private int maxCount;
     private LinkedList<String> recentList;
 
-    public RecentListManager(int maxCount, Context context) {
-        mContext = context;
+    public RecentListManager(int maxCount, ContentResolver contentResolver) {
+        mContentResolver = contentResolver;
         this.maxCount = maxCount;
         recentList = new LinkedList<>();
     }
@@ -35,7 +35,7 @@ public class RecentListManager {
         recentList.clear();
         ContentValues cv = new ContentValues();
         cv.put(DBStruct.AllMusic.IS_RECENT, false);
-        mContext.getContentResolver().update(DBStruct.AllMusic.CONTENT_URI, cv, null, null);
+        mContentResolver.update(DBStruct.AllMusic.CONTENT_URI, cv, null, null);
     }
 
     public int getMaxCount() {
@@ -64,7 +64,7 @@ public class RecentListManager {
     private void updateRecentDatabase() {
         ContentValues cv = new ContentValues();
         cv.put(DBStruct.RecentList.DATA, toString());
-        mContext.getContentResolver().update(DBStruct.RecentList.CONTENT_URI, cv, null, null);
+        mContentResolver.update(DBStruct.RecentList.CONTENT_URI, cv, null, null);
     }
 
     private void updateMusicDatabase(String id, boolean isRecent) {
@@ -72,7 +72,7 @@ public class RecentListManager {
         cv.put(DBStruct.AllMusic.IS_RECENT, isRecent);
         String selection = DBStruct.AllMusic._ID + " = ?";
         String[] selectionArgs = new String[]{id};
-        mContext.getContentResolver().update(DBStruct.AllMusic.CONTENT_URI, cv, selection, selectionArgs);
+        mContentResolver.update(DBStruct.AllMusic.CONTENT_URI, cv, selection, selectionArgs);
     }
 
     public void parseRecentListFromCursor(Cursor cursor) {

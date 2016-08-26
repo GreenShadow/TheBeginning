@@ -9,7 +9,7 @@ import java.net.URI;
  * @author greenshadow
  */
 public final class DBStruct {
-    public static final String AUTHORITY = "com.greenshadow.thebeginning.MusicListProvider";
+    public static final String AUTHORITY = "com.greenshadow.thebeginning.MusicProvider";
 
     public static final Uri BASE_URI = new Uri.Builder()
             .scheme("content")
@@ -26,7 +26,6 @@ public final class DBStruct {
         public static final String DISPLAY_NAME = "display_name";
         public static final String ARTIST = "artist";
         public static final String ALBUM = "album";
-        public static final String RAW_URI = "raw_uri";
         public static final String FILE_PATH = "file_path";
         public static final String LYRIC = "lyric";
     }
