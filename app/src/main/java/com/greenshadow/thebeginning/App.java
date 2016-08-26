@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 
 import com.greenshadow.thebeginning.data.DBStruct;
-import com.greenshadow.thebeginning.managers.RecentListManager;
+import com.greenshadow.thebeginning.manager.RecentListManager;
 
 /**
  * @author greenshadow

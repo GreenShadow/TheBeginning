@@ -21,7 +21,7 @@
         <activity android:name=".ui.MainActivity" />
 
         <provider
-            android:name=".providers.MusicProvider"
+            android:name=".provider.MusicProvider"
             android:authorities="com.greenshadow.thebeginning.MusicProvider" />
     </application>
 

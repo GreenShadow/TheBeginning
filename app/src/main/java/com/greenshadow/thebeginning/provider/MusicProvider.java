@@ -1,4 +1,4 @@
-package com.greenshadow.thebeginning.providers;
+package com.greenshadow.thebeginning.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -31,19 +31,7 @@ public class MusicProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE IF NOT EXISTS " + DBStruct.AllMusic.TABLE_NAME +
-                    "(" +
-                    DBStruct.AllMusic._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    DBStruct.AllMusic.PLAYLIST_ID + " TEXT, " +
-                    DBStruct.AllMusic.IS_RECENT + " INTEGER, " +
-                    DBStruct.AllMusic.DISPLAY_NAME + " TEXT, " +
-                    DBStruct.AllMusic.ARTIST + " TEXT, " +
-                    DBStruct.AllMusic.ARTIST + " TEXT, " +
-                    DBStruct.AllMusic.ALBUM + " TEXT, " +
-                    DBStruct.AllMusic.FILE_PATH + " TEXT, " +
-                    DBStruct.AllMusic.LYRIC + " TEXT" +
-                    ");");
-
+            createMusicTable(db);
             db.execSQL("CREATE TABLE IF NOT EXISTS " + DBStruct.Playlist.TABLE_NAME +
                     "(" +
                     DBStruct.Playlist._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -76,6 +64,27 @@ public class MusicProvider extends ContentProvider {
             db.execSQL("DROP TABLE IF EXISTS " + DBStruct.Playlist.TABLE_NAME + ";");
             db.execSQL("DROP TABLE IF EXISTS " + DBStruct.RecentList.TABLE_NAME + ";");
             onCreate(db);
+        }
+
+        public void clearMusicTable(SQLiteDatabase db) {
+            db.execSQL("DROP TABLE IF EXISTS " + DBStruct.AllMusic.TABLE_NAME + ";");
+            createMusicTable(db);
+        }
+
+        private void createMusicTable(SQLiteDatabase db) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + DBStruct.AllMusic.TABLE_NAME +
+                    "(" +
+                    DBStruct.AllMusic._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    DBStruct.AllMusic.RAW_MUSIC_ID + " INTEGER, " +
+                    DBStruct.AllMusic.PLAYLIST_ID + " TEXT, " +
+                    DBStruct.AllMusic.IS_RECENT + " INTEGER, " +
+                    DBStruct.AllMusic.DISPLAY_NAME + " TEXT, " +
+                    DBStruct.AllMusic.ARTIST + " TEXT, " +
+                    DBStruct.AllMusic.ARTIST + " TEXT, " +
+                    DBStruct.AllMusic.ALBUM + " TEXT, " +
+                    DBStruct.AllMusic.FILE_PATH + " TEXT, " +
+                    DBStruct.AllMusic.LYRIC + " TEXT" +
+                    ");");
         }
     }
 
@@ -167,6 +176,9 @@ public class MusicProvider extends ContentProvider {
             case MUSIC_ALL:
                 table = DBStruct.AllMusic.TABLE_NAME;
                 break;
+            case MUSIC_RELOAD:
+                dbHelper.clearMusicTable(db);
+                return 0;
             case MUSIC_RECENT:
                 table = DBStruct.RecentList.TABLE_NAME;
                 break;
@@ -214,7 +226,7 @@ public class MusicProvider extends ContentProvider {
     private static final String AUTHORITY = DBStruct.AUTHORITY;
 
     private static final int MUSIC_ALL = 0;
-    private static final int MUSIC_CURRENT_ID = 1;
+    private static final int MUSIC_RELOAD = 1;
     private static final int MUSIC_RECENT = 2;
     private static final int MUSIC_STAR = 3;
     private static final int MUSIC_CURRENT_LIST = 4;
@@ -224,7 +236,7 @@ public class MusicProvider extends ContentProvider {
 
     static {
         uriMatcher.addURI(AUTHORITY, DBStruct.AllMusic.TABLE_NAME, MUSIC_ALL);
-        uriMatcher.addURI(AUTHORITY, DBStruct.AllMusic.TABLE_NAME + "/#", MUSIC_CURRENT_ID);
+        uriMatcher.addURI(AUTHORITY, DBStruct.AllMusic.TABLE_NAME + "/drop", MUSIC_RELOAD);
         uriMatcher.addURI(AUTHORITY, DBStruct.RecentList.TABLE_NAME, MUSIC_RECENT);
         uriMatcher.addURI(AUTHORITY, DBStruct.Playlist.TABLE_NAME + "/star", MUSIC_STAR);
         uriMatcher.addURI(AUTHORITY, DBStruct.Playlist.TABLE_NAME + "/*", MUSIC_CURRENT_LIST);

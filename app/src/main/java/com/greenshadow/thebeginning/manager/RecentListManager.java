@@ -1,4 +1,4 @@
-package com.greenshadow.thebeginning.managers;
+package com.greenshadow.thebeginning.manager;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
