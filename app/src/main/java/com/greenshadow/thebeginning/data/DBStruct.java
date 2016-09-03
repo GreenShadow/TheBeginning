@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public final class DBStruct {
     public static final String AUTHORITY = "com.greenshadow.thebeginning.MusicProvider";
 
-    public static final Uri BASE_URI = new Uri.Builder()
+    private static final Uri BASE_URI = new Uri.Builder()
             .scheme("content")
             .encodedAuthority(AUTHORITY)
             .build();
@@ -29,6 +29,14 @@ public final class DBStruct {
         public static final String ALBUM = "album";
         public static final String FILE_PATH = "file_path";
         public static final String LYRIC = "lyric";
+
+        public static final String[] MUSIC_DISPLAY_LIST_PROJECTION = new String[]{
+                _ID,
+                PLAYLIST_ID,
+                DISPLAY_NAME,
+                ARTIST,
+                ALBUM,
+        };
     }
 
     public static final class Playlist implements BaseColumns {

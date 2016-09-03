@@ -42,7 +42,7 @@ public class MusicProvider extends ContentProvider {
 
             ContentValues cv = new ContentValues();
             cv.put(DBStruct.Playlist.NAME, DBStruct.Playlist.STAR);
-            cv.put(DBStruct.Playlist.DESCRIPTION, "null");
+            cv.putNull(DBStruct.Playlist.DESCRIPTION);
             cv.put(DBStruct.Playlist.COVER, "null");
             db.insert(DBStruct.Playlist.TABLE_NAME, null, cv);
 
@@ -54,8 +54,9 @@ public class MusicProvider extends ContentProvider {
                     ");");
 
             cv.clear();
-            cv.put(DBStruct.RecentList.DATA, "");
             cv.put(DBStruct.RecentList.COUNT, 0);
+            cv.put(DBStruct.RecentList.DATA, "");
+            db.insert(DBStruct.RecentList.TABLE_NAME, null, cv);
         }
 
         @Override
@@ -79,7 +80,6 @@ public class MusicProvider extends ContentProvider {
                     DBStruct.AllMusic.PLAYLIST_ID + " TEXT, " +
                     DBStruct.AllMusic.IS_RECENT + " INTEGER, " +
                     DBStruct.AllMusic.DISPLAY_NAME + " TEXT, " +
-                    DBStruct.AllMusic.ARTIST + " TEXT, " +
                     DBStruct.AllMusic.ARTIST + " TEXT, " +
                     DBStruct.AllMusic.ALBUM + " TEXT, " +
                     DBStruct.AllMusic.FILE_PATH + " TEXT, " +
@@ -108,16 +108,16 @@ public class MusicProvider extends ContentProvider {
                 qb.setTables(DBStruct.AllMusic.TABLE_NAME);
                 break;
             case MUSIC_RECENT:
-                qb.setTables(DBStruct.AllMusic.TABLE_NAME);
-                qb.appendWhere(DBStruct.AllMusic.IS_RECENT + " = 1");
+                qb.setTables(DBStruct.RecentList.TABLE_NAME);
+//                qb.appendWhere(DBStruct.AllMusic.IS_RECENT + " = 1");
                 break;
             case MUSIC_STAR:
                 qb.setTables(DBStruct.AllMusic.TABLE_NAME);
-                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " = " + DBStruct.Playlist.STAR);
+                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " like '%" + DBStruct.Playlist.STAR + "%'");
                 break;
             case MUSIC_CURRENT_LIST:
                 qb.setTables(DBStruct.AllMusic.TABLE_NAME);
-                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " like " + uri.getLastPathSegment());
+                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " like '%" + uri.getLastPathSegment() + "%'");
                 break;
             case LIST_ALL:
                 qb.setTables(DBStruct.Playlist.TABLE_NAME);
@@ -133,7 +133,7 @@ public class MusicProvider extends ContentProvider {
 
         Cursor result;
         try {
-            result = qb.query(dbHelper.getWritableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
+            result = qb.query(dbHelper.getReadableDatabase(), projection, selection, selectionArgs, null, null, sortOrder);
         } catch (SQLException e) {
             Log.e(TAG, "returning NULL cursor, query: " + uri, e);
             return null;
@@ -205,6 +205,8 @@ public class MusicProvider extends ContentProvider {
                 break;
             case MUSIC_RECENT:
                 table = DBStruct.RecentList.TABLE_NAME;
+                int count = values.getAsString(DBStruct.RecentList.DATA).trim().split(" ").length;
+                values.put(DBStruct.RecentList.COUNT, count);
                 break;
             case LIST_ALL:
                 table = DBStruct.Playlist.TABLE_NAME;

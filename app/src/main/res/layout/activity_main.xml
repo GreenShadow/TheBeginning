@@ -8,9 +8,12 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp">
 
         <ImageButton
+            android:id="@+id/music_star"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -22,6 +25,7 @@
             android:tint="@color/primary" />
 
         <ImageButton
+            android:id="@+id/music_list"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -33,10 +37,12 @@
             android:tint="@color/primary" />
 
         <ImageButton
+            android:id="@+id/music_all"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="?attr/selectableItemBackground"
+            android:contentDescription="@null"
             android:paddingBottom="8dp"
             android:paddingTop="8dp"
             android:scaleType="centerInside"
@@ -44,14 +50,9 @@
             android:tint="@color/primary" />
     </LinearLayout>
 
-    <!--<TextView-->
-    <!--style="?android:attr/listSeparatorTextViewStyle"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:text="@string/recent" />-->
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:listSelector="?android:attr/selectableItemBackground" />
 </LinearLayout>

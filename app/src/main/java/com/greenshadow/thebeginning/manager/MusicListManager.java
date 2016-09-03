@@ -23,26 +23,26 @@ import java.util.ArrayList;
  * @author greenshadow
  */
 public class MusicListManager {
-    private static MusicListManager mInstance;
+//    private static MusicListManager mInstance;
 
     private ContentResolver contentResolver;
     private ArrayList<MusicBean> musicList;
 
-    private MusicListManager(ContentResolver contentResolver) {
+    public MusicListManager(ContentResolver contentResolver) {
         this.contentResolver = contentResolver;
     }
 
-    public static MusicListManager getInstance(ContentResolver contentResolver) {
-        if (mInstance == null) {
-            synchronized (MusicListManager.class) {
-                if (mInstance == null) {
-                    mInstance = new MusicListManager(contentResolver);
-                }
-            }
-        }
-        return mInstance;
-    }
-
+//    public static MusicListManager getInstance(ContentResolver contentResolver) {
+//        if (mInstance == null) {
+//            synchronized (MusicListManager.class) {
+//                if (mInstance == null) {
+//                    mInstance = new MusicListManager(contentResolver);
+//                }
+//            }
+//        }
+//        return mInstance;
+//    }
+//
     String[] projection = new String[]{
             DBStruct.AllMusic.RAW_MUSIC_ID,
             DBStruct.AllMusic.PLAYLIST_ID,
@@ -53,7 +53,6 @@ public class MusicListManager {
             DBStruct.AllMusic.FILE_PATH,
             DBStruct.AllMusic.LYRIC,
     };
-
 
     public void load() {
         String[] projection = new String[]{

@@ -19,8 +19,8 @@ public class RecentListManager {
 
     public RecentListManager(int maxCount, ContentResolver contentResolver) {
         mContentResolver = contentResolver;
-        this.maxCount = maxCount;
         recentList = new LinkedList<>();
+        updateMaxCount(maxCount);
     }
 
     public void addRecent(String id) {
@@ -34,15 +34,19 @@ public class RecentListManager {
     public void clearRecent() {
         recentList.clear();
         ContentValues cv = new ContentValues();
-        cv.put(DBStruct.AllMusic.IS_RECENT, false);
+        cv.put(DBStruct.AllMusic.IS_RECENT, 0);
         mContentResolver.update(DBStruct.AllMusic.CONTENT_URI, cv, null, null);
+    }
+
+    public Cursor getRecentCursor(String[] projection) {
+        return mContentResolver.query(DBStruct.AllMusic.CONTENT_URI, projection, "is_recent = 1", null, DBStruct.AllMusic._ID);
     }
 
     public int getMaxCount() {
         return maxCount;
     }
 
-    public void setMaxCount(int maxCount) {
+    public void updateMaxCount(int maxCount) {
         if (maxCount < this.maxCount) {
             while (recentList.size() > maxCount) {
                 removeLast();
@@ -50,6 +54,15 @@ public class RecentListManager {
             updateRecentDatabase();
         }
         this.maxCount = maxCount;
+        Cursor cursor = mContentResolver.query(DBStruct.RecentList.CONTENT_URI, new String[]{DBStruct.RecentList.COUNT},
+                null, null, null);
+        if (cursor != null && cursor.getCount() == 0) {
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            if (count > maxCount) {
+                updateRecentDatabase();
+            }
+        }
     }
 
     private void addFirst(String id) {
@@ -69,15 +82,19 @@ public class RecentListManager {
 
     private void updateMusicDatabase(String id, boolean isRecent) {
         ContentValues cv = new ContentValues();
-        cv.put(DBStruct.AllMusic.IS_RECENT, isRecent);
+        cv.put(DBStruct.AllMusic.IS_RECENT, isRecent ? 1 : 0);
         String selection = DBStruct.AllMusic._ID + " = ?";
         String[] selectionArgs = new String[]{id};
         mContentResolver.update(DBStruct.AllMusic.CONTENT_URI, cv, selection, selectionArgs);
     }
 
     public void parseRecentListFromCursor(Cursor cursor) {
+        if (cursor == null || cursor.getCount() == 0) {
+            return;
+        }
+        cursor.moveToFirst();
         String list = cursor.getString(0);
-        String[] lists = list.split(" ");
+        String[] lists = list.trim().split(" ");
         for (String item : lists) {
             if (!TextUtils.isEmpty(item)) {
                 recentList.addLast(item);
