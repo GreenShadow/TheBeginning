@@ -5,9 +5,9 @@
     android:orientation="vertical">
 
     <ListView
-        android:id="@android:id/list"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include layout="@layout/view_music_list_empty" />
 </LinearLayout>

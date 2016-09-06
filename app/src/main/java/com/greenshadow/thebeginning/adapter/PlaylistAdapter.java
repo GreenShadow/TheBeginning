@@ -36,7 +36,7 @@ public class PlaylistAdapter extends AbsCursorAdapter {
     protected void onBindContent(View rootView, Context context, Cursor cursor) {
         String name = cursor.getString(cursor.getColumnIndex(DBStruct.Playlist.NAME));
         if (name.equals(DBStruct.Playlist.STAR)) {
-            name = mContext.getString(R.string.my_star_music);
+            name = mContext.getString(R.string.my_collection);
         }
         playlistTitle.setText(name);
         String description = cursor.getString(cursor.getColumnIndex(DBStruct.Playlist.DESCRIPTION));

@@ -26,7 +26,7 @@ public class App extends Application {
 
         sp = getSharedPreferences("music_settings", MODE_PRIVATE);
         musicListManager = new MusicListManager(getApplicationContext().getContentResolver());
-        musicListManager.load();
+//        musicListManager.load();
 
         recentListManager = new RecentListManager(sp.getInt("recent_max_count", 10),
                 getApplicationContext().getContentResolver());
@@ -38,6 +38,10 @@ public class App extends Application {
 
     public static App getInstance() {
         return mInstance;
+    }
+
+    public MusicListManager getMusicListManager() {
+        return musicListManager;
     }
 
     public RecentListManager getRecentListManager() {

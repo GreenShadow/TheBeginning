@@ -22,7 +22,6 @@ public final class DBStruct {
         public static final Uri RELOAD_URI = Uri.withAppendedPath(CONTENT_URI, "drop");
 
         public static final String RAW_MUSIC_ID = "raw_music_id";
-        public static final String PLAYLIST_ID = "playlist_id";
         public static final String IS_RECENT = "is_recent";
         public static final String DISPLAY_NAME = "display_name";
         public static final String ARTIST = "artist";
@@ -32,7 +31,6 @@ public final class DBStruct {
 
         public static final String[] MUSIC_DISPLAY_LIST_PROJECTION = new String[]{
                 _ID,
-                PLAYLIST_ID,
                 DISPLAY_NAME,
                 ARTIST,
                 ALBUM,
@@ -47,6 +45,7 @@ public final class DBStruct {
         public static final String NAME = "name";
         public static final String DESCRIPTION = "description";
         public static final String COVER = "cover";
+        public static final String DATA = "data";
 
         public static final String STAR = "_star_";
     }

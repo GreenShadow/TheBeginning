@@ -2,5 +2,16 @@
     <string name="app_name">TheBeginning</string>
     <string name="recent">Recent</string>
     <string name="separator">&#160;-&#160;</string>
-    <string name="my_star_music">My collection</string>
+    <string name="my_collection">My collection</string>
+    <string name="no_music_to_scan">还没有音乐，扫描一下试试</string>
+    <string name="no_music_local">本地没有音乐</string>
+    <string name="no_star">还没有收藏</string>
+    <string name="no_music_in_playlyst">播放列表中还没有音乐</string>
+    <string name="no_play_list">还没有播放列表，快去创建一个吧</string>
+    <string name="refresh">Refresh</string>
+    <string name="exit">Exit</string>
+    <string name="next">Next&#160;></string>
+    <string name="all_music">All music</string>
+    <string name="play_list">Playlist</string>
+    <string name="scan_music">Scan music</string>
 </resources>

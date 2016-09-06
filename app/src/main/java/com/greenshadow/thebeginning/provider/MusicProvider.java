@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.greenshadow.thebeginning.data.DBStruct;
@@ -37,7 +38,8 @@ public class MusicProvider extends ContentProvider {
                     DBStruct.Playlist._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     DBStruct.Playlist.NAME + " TEXT, " +
                     DBStruct.Playlist.DESCRIPTION + " TEXT, " +
-                    DBStruct.Playlist.COVER + " TEXT" +
+                    DBStruct.Playlist.COVER + " TEXT, " +
+                    DBStruct.Playlist.DATA + " TEXT" +
                     ");");
 
             ContentValues cv = new ContentValues();
@@ -67,9 +69,15 @@ public class MusicProvider extends ContentProvider {
             onCreate(db);
         }
 
-        public void clearMusicTable(SQLiteDatabase db) {
-            db.execSQL("DROP TABLE IF EXISTS " + DBStruct.AllMusic.TABLE_NAME + ";");
-            createMusicTable(db);
+        public boolean clearMusicTable(SQLiteDatabase db) {
+            try {
+                db.execSQL("DROP TABLE IF EXISTS " + DBStruct.AllMusic.TABLE_NAME + ";");
+                createMusicTable(db);
+            } catch (SQLException e) {
+                Log.e(TAG, "Drop music table error! " + e);
+                return false;
+            }
+            return true;
         }
 
         private void createMusicTable(SQLiteDatabase db) {
@@ -77,7 +85,6 @@ public class MusicProvider extends ContentProvider {
                     "(" +
                     DBStruct.AllMusic._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     DBStruct.AllMusic.RAW_MUSIC_ID + " INTEGER, " +
-                    DBStruct.AllMusic.PLAYLIST_ID + " TEXT, " +
                     DBStruct.AllMusic.IS_RECENT + " INTEGER, " +
                     DBStruct.AllMusic.DISPLAY_NAME + " TEXT, " +
                     DBStruct.AllMusic.ARTIST + " TEXT, " +
@@ -101,6 +108,7 @@ public class MusicProvider extends ContentProvider {
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+        String where;
 
         int match = uriMatcher.match(uri);
         switch (match) {
@@ -112,12 +120,14 @@ public class MusicProvider extends ContentProvider {
 //                qb.appendWhere(DBStruct.AllMusic.IS_RECENT + " = 1");
                 break;
             case MUSIC_STAR:
+                where = getPlaylistMusicIds(dbHelper.getReadableDatabase(), DBStruct.Playlist.STAR);
                 qb.setTables(DBStruct.AllMusic.TABLE_NAME);
-                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " like '%" + DBStruct.Playlist.STAR + "%'");
+                qb.appendWhere(DBStruct.AllMusic._ID + " IN (" + where + ")");
                 break;
             case MUSIC_CURRENT_LIST:
+                where = getPlaylistMusicIds(dbHelper.getReadableDatabase(), uri.getLastPathSegment());
                 qb.setTables(DBStruct.AllMusic.TABLE_NAME);
-                qb.appendWhere(DBStruct.AllMusic.PLAYLIST_ID + " like '%" + uri.getLastPathSegment() + "%'");
+                qb.appendWhere(DBStruct.AllMusic._ID + " IN (" + where + ")");
                 break;
             case LIST_ALL:
                 qb.setTables(DBStruct.Playlist.TABLE_NAME);
@@ -139,6 +149,28 @@ public class MusicProvider extends ContentProvider {
             return null;
         }
         return result;
+    }
+
+    private String getPlaylistMusicIds(SQLiteDatabase db, String name) {
+        Cursor c = db.query(DBStruct.Playlist.TABLE_NAME, new String[]{DBStruct.Playlist.DATA}, DBStruct.Playlist.NAME + "=?",
+                new String[]{name}, null, null, null);
+        if (c == null) {
+            return null;
+        }
+        String result = null;
+        try {
+            result = c.getString(0);
+        } catch (Exception e) {
+            Log.e(TAG, "get playlist error" + e);
+            return null;
+        } finally {
+            c.close();
+        }
+        if (!TextUtils.isEmpty(result)) {
+            result = TextUtils.join(", ", TextUtils.split(result, ", "));
+            return result;
+        }
+        return null;
     }
 
     @Nullable
@@ -177,8 +209,7 @@ public class MusicProvider extends ContentProvider {
                 table = DBStruct.AllMusic.TABLE_NAME;
                 break;
             case MUSIC_RELOAD:
-                dbHelper.clearMusicTable(db);
-                return 0;
+                return dbHelper.clearMusicTable(db) ? 0 : -1;
             case MUSIC_RECENT:
                 table = DBStruct.RecentList.TABLE_NAME;
                 break;

@@ -1,5 +1,6 @@
 package com.greenshadow.thebeginning.ui;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MergeCursor;
@@ -14,6 +15,7 @@ import android.widget.ListView;
 import com.greenshadow.thebeginning.App;
 import com.greenshadow.thebeginning.R;
 import com.greenshadow.thebeginning.adapter.PlaylistAdapter;
+import com.greenshadow.thebeginning.data.DBStruct;
 
 /**
  * @author greenshadow
@@ -76,12 +78,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        Intent i;
         switch (v.getId()) {
             case R.id.music_star:
+                i = new Intent(this, MusicListActivity.class);
+                i.putExtra(MusicListActivity.EXTRA_TYPE, MusicListActivity.TYPE_MUSIC_STAR);
+                startActivity(i);
                 break;
             case R.id.music_list:
                 break;
             case R.id.music_all:
+                i = new Intent(this, MusicListActivity.class);
+                i.putExtra(MusicListActivity.EXTRA_TYPE, MusicListActivity.TYPE_MUSIC_ALL);
+                startActivity(i);
                 break;
         }
     }
