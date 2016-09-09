@@ -6,21 +6,18 @@ import android.database.MatrixCursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
-import com.greenshadow.thebeginning.App;
 import com.greenshadow.thebeginning.R;
 import com.greenshadow.thebeginning.adapter.PlaylistAdapter;
-import com.greenshadow.thebeginning.data.DBStruct;
 
 /**
  * @author greenshadow
  */
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
     private Cursor mCursor;
     private PlaylistAdapter mAdapter;
     private MatrixCursor recentTitle, starTitle;
@@ -69,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             starTitle = new MatrixCursor(new String[]{"_id", "title"});
             starTitle.addRow(new String[]{"-1", "playlist"});
         }
-        Cursor playlist = App.getInstance().getPlaylistManager().getAllPlaylist();
+        Cursor playlist = getApp().getPlaylistManager().getAllPlaylist();
 
         mCursor = new MergeCursor(new Cursor[]{/*recentTitle, recent, */starTitle, playlist});
         mAdapter = new PlaylistAdapter(this, mCursor);

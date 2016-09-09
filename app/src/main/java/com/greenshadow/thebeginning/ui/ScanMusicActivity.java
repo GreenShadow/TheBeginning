@@ -1,8 +1,6 @@
 package com.greenshadow.thebeginning.ui;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,10 +11,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.greenshadow.thebeginning.R;
 import com.greenshadow.thebeginning.data.DBStruct;
@@ -25,15 +24,16 @@ import com.greenshadow.thebeginning.util.PermissionCheckUtil;
 /**
  * @author greenshadow
  */
-
-public class ScanMusicActivity extends AppCompatActivity implements View.OnClickListener {
-    private Button scanMusic;
-    private AlertDialog dialog;
+public class ScanMusicActivity extends BaseActivity implements View.OnClickListener {
+    private boolean isScanning;
+    private Button btnScanMusic;
+    private ProgressBar progressBar;
 
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+            isRunning(false);
             setResult(RESULT_OK);
             finish();
         }
@@ -43,8 +43,9 @@ public class ScanMusicActivity extends AppCompatActivity implements View.OnClick
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sacn_music);
-        scanMusic = (Button) findViewById(R.id.scan_music);
-        scanMusic.setOnClickListener(this);
+        btnScanMusic = (Button) findViewById(R.id.scan_music);
+        progressBar = (ProgressBar) findViewById(R.id.progress);
+        btnScanMusic.setOnClickListener(this);
     }
 
     @Override
@@ -63,12 +64,17 @@ public class ScanMusicActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void scanMusic() {
-        if (dialog != null && dialog.isShowing()) {
-            throw new IllegalStateException("dialog is showing!");
+    @Override
+    public void onBackPressed() {
+        if (isScanning) {
+            Toast.makeText(this, R.string.scanning, Toast.LENGTH_LONG).show();
+            return;
         }
-        initProgressDialog();
-        dialog.show();
+        super.onBackPressed();
+    }
+
+    public void scanMusic() {
+        isRunning(true);
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -89,7 +95,6 @@ public class ScanMusicActivity extends AppCompatActivity implements View.OnClick
 
                 Cursor cursor = getContentResolver().query(contentUri, projection, where, null, sortOrder);
                 if (cursor == null || cursor.getCount() == 0) {
-                    dialog.dismiss();
                     Message.obtain(handler, 0).sendToTarget();
                     return;
                 }
@@ -115,24 +120,15 @@ public class ScanMusicActivity extends AppCompatActivity implements View.OnClick
 
                     getContentResolver().insert(DBStruct.AllMusic.CONTENT_URI, cv);
                 }
-                dialog.dismiss();
-                Message.obtain(handler, 0, cursor).sendToTarget();
+                cursor.close();
+                Message.obtain(handler, 0).sendToTarget();
             }
         });
     }
 
-    private void initProgressDialog() {
-        if (dialog == null || !(dialog instanceof ProgressDialog)) {
-            dialog = new ProgressDialog.Builder(this)
-                    .setCancelable(false)
-                    .setOnKeyListener(new DialogInterface.OnKeyListener() {
-                        @Override
-                        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                            return keyCode == KeyEvent.KEYCODE_BACK;
-                        }
-                    })
-                    .setMessage("Loading...")
-                    .create();
-        }
+    private void isRunning(boolean isRunning) {
+        this.isScanning = isRunning;
+        btnScanMusic.setEnabled(!isRunning);
+        progressBar.setVisibility(isRunning ? View.VISIBLE : View.GONE);
     }
 }

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -13,16 +12,14 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.greenshadow.thebeginning.App;
 import com.greenshadow.thebeginning.R;
 import com.greenshadow.thebeginning.adapter.MusicListAdapter;
-import com.greenshadow.thebeginning.manager.MusicListManager;
 import com.greenshadow.thebeginning.ui.view.MusicListEmptyView;
 
 /**
  * @author greenshadow
  */
-public class MusicListActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MusicListActivity extends BaseActivity implements AdapterView.OnItemClickListener {
     public static final String EXTRA_TYPE = "type";
     public static final String EXTRA_LIST_NAME = "list_name";
     public static final String TYPE_MUSIC_ALL = "all";
@@ -30,6 +27,7 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
     public static final String TYPE_MUSIC_PLAYLIST = "playlist";
 
     private static final String TAG = "MusicListActivity";
+    private static final int REQUEST_CODE_SCAN_MUSIC = 0;
 
     private MusicListAdapter mAdapter;
     private ListView mList;
@@ -63,7 +61,7 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
             emptyView.setRefreshClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startActivityForResult(new Intent(MusicListActivity.this, ScanMusicActivity.class), 0);
+                    startActivityForResult(new Intent(MusicListActivity.this, ScanMusicActivity.class), REQUEST_CODE_SCAN_MUSIC);
                 }
             });
         }
@@ -85,7 +83,7 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
         Cursor cursor;
         switch (mActivityType) {
             case TYPE_MUSIC_ALL:
-                cursor = App.getInstance().getMusicListManager().getAllMusic();
+                cursor = getApp().getMusicListManager().getAllMusic();
                 if (cursor == null) {
                     Log.e(TAG, "finish, get all music error");
                     return false;
@@ -94,7 +92,7 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
                 mTitle = getString(R.string.all_music);
                 break;
             case TYPE_MUSIC_STAR:
-                cursor = App.getInstance().getPlaylistManager().getStarList();
+                cursor = getApp().getPlaylistManager().getStarList();
                 if (cursor == null) {
                     Log.e(TAG, "finish, start list load error!");
                     return false;
@@ -103,12 +101,15 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
                 mTitle = getString(R.string.my_collection);
                 break;
             case TYPE_MUSIC_PLAYLIST:
+                if (intent == null) {
+                    throw new NullPointerException("intent must nonnull when type is TYPE_MUSIC_PLAYLIST");
+                }
                 listName = intent.getStringExtra(EXTRA_LIST_NAME);
                 if (TextUtils.isEmpty(listName)) {
                     Log.e(TAG, "finish, playlist name is empty!");
                     return false;
                 }
-                cursor = App.getInstance().getPlaylistManager().getPlaylist(listName);
+                cursor = getApp().getPlaylistManager().getPlaylist(listName);
                 if (cursor == null) {
                     Log.e(TAG, "finish, playlist not exists!");
                     return false;
@@ -126,12 +127,7 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                break;
-        }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -141,23 +137,25 @@ public class MusicListActivity extends AppCompatActivity implements AdapterView.
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK){
-            
+        if (resultCode == RESULT_CANCELED) {
+            return;
+        }
+        switch (requestCode) {
+            case REQUEST_CODE_SCAN_MUSIC:
+                if (resultCode == RESULT_OK) {
+                    if (!mActivityType.equals(TYPE_MUSIC_PLAYLIST)) {
+                        Cursor c = getApp().getMusicListManager().getAllMusic();
+                        if (mAdapter == null) {
+                            mAdapter = new MusicListAdapter(this, c);
+                        } else {
+                            mAdapter.changeCursor(c);
+                        }
+                        if (c.getCount() == 0) {
+                            emptyView.setEmptyType(MusicListEmptyView.TYPE_LOCAL_NO_MUSIC);
+                        }
+                    }
+                }
+                break;
         }
     }
-
-    //    @Override
-//    public void onFinish(Cursor cursor) {
-//        if (cursor == null || cursor.isClosed() || cursor.getCount() == 0) {
-//            Toast.makeText(this, "no musics found", Toast.LENGTH_LONG).show();
-//            emptyView.setEmptyType(MusicListEmptyView.TYPE_LOCAL_NO_MUSIC);
-//        } else {
-//            Toast.makeText(this, "scan finish", Toast.LENGTH_LONG).show();
-//        }
-//    }
-//
-//    @Override
-//    public void onPermissionDenied() {
-
-//    }
 }

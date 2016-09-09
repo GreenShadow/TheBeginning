@@ -6,16 +6,16 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.greenshadow.thebeginning.R;
+import com.greenshadow.thebeginning.manager.ActivityMgr;
 
 /**
  * @author greenshadow
  */
 
-public class PermissionRequestActivity extends AppCompatActivity {
+public class PermissionRequestActivity extends BaseActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,7 +26,7 @@ public class PermissionRequestActivity extends AppCompatActivity {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.exit:
-                finish();
+                ActivityMgr.getInstance().exit();
                 return;
             case R.id.next:
                 requestPermission();

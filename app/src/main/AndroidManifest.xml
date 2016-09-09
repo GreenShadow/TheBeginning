@@ -26,6 +26,9 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.MusicListActivity" />
+        <activity android:name=".ui.ScanMusicActivity" />
+
+        <service android:name=".services.MusicPlayService" />
 
         <provider
             android:name=".provider.MusicProvider"

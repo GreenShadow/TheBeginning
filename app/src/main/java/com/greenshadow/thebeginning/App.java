@@ -12,8 +12,6 @@ import com.greenshadow.thebeginning.manager.RecentListManager;
  * @author greenshadow
  */
 public class App extends Application {
-    private static App mInstance;
-
     private MusicListManager musicListManager;
     private RecentListManager recentListManager;
     private PlaylistManager playlistManager;
@@ -22,22 +20,15 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        mInstance = this;
 
         sp = getSharedPreferences("music_settings", MODE_PRIVATE);
-        musicListManager = new MusicListManager(getApplicationContext().getContentResolver());
-//        musicListManager.load();
+        musicListManager = new MusicListManager(getContentResolver());
 
-        recentListManager = new RecentListManager(sp.getInt("recent_max_count", 10),
-                getApplicationContext().getContentResolver());
+        recentListManager = new RecentListManager(sp.getInt("recent_max_count", 10), getContentResolver());
         recentListManager.parseRecentListFromCursor(getContentResolver()
                 .query(DBStruct.RecentList.CONTENT_URI, new String[]{DBStruct.RecentList.DATA},
                         null, null, null));
-        playlistManager = new PlaylistManager(getApplicationContext().getContentResolver());
-    }
-
-    public static App getInstance() {
-        return mInstance;
+        playlistManager = new PlaylistManager(getContentResolver());
     }
 
     public MusicListManager getMusicListManager() {

@@ -8,7 +8,6 @@ import android.support.v4.app.ActivityCompat;
 /**
  * @author greenshadow
  */
-
 public class PermissionCheckUtil {
     public static boolean checkStoragePermission(Context context) {
         return ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) ==
